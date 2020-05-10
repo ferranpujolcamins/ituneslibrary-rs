@@ -1,0 +1,14 @@
+[package]
+name = "ituneslibrary-rs"
+version = "0.1.0"
+authors = ["Ferran Pujol Camins <ferranpujolcamins@gmail.com>"]
+description = "This is an iTunesLibrary library for Rust built on top of the low-level bindings ituneslibrary-sys. iTunesLibrary is a macOS framework that provides APIs to retrieve the properties of the media in the user’s iTunes or Music app library."
+license = "GPL-3.0"
+repository = "https://github.com/ferranpujolcamins/ituneslibrary-rs"
+readme = "README.md"
+categories = ["os::macos-apis"]
+keywor = ["itunes", "music"]
+edition = "2018"
+
+[dependencies]
+ituneslibrary-sys = { path = "../ituneslibrary-sys" }
