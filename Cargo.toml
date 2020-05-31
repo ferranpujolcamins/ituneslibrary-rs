@@ -7,8 +7,10 @@ license = "GPL-3.0"
 repository = "https://github.com/ferranpujolcamins/ituneslibrary-rs"
 readme = "README.md"
 categories = ["os::macos-apis"]
-keywor = ["itunes", "music"]
+keywords = ["itunes", "music"]
 edition = "2018"
 
-[dependencies]
-ituneslibrary-sys = { path = "../ituneslibrary-sys" }
+[dependencies.objc]
+version = "0.2.7"
+default-features = false
+features = ["exception", "verify_message"]
