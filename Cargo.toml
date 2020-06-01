@@ -14,6 +14,8 @@ edition = "2018"
 ituneslibrary-sys = { path = "../ituneslibrary-sys" }
 objc-foundation = "^0.1.1"
 objc_id = "^0.1.1"
+chrono = "^0.4.11"
+url = "^2.1.1"
 
 [dependencies.objc]
 version = "^0.2.7"

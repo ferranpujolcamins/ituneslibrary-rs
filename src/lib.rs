@@ -1,6 +1,13 @@
 extern crate ituneslibrary_sys;
 extern crate objc;
 extern crate objc_foundation;
+extern crate chrono;
+
+#[link(name = "iTunesLibrary", kind = "framework")]
+extern {}
+
+mod artist;
+mod album;
 
 use std::os::raw::c_void;
 use objc::runtime::{Object, Sel, BOOL};
@@ -11,9 +18,11 @@ use ituneslibrary_sys::{id, ITLibrary, ITLibInitOptions};
 use std::any::Any;
 use std::ops::Deref;
 use std::mem;
+use chrono::{Date, Utc};
+use url::Url;
 
-#[link(name = "iTunesLibrary", kind = "framework")]
-extern {}
+use artist::ITLibArtist;
+use album::ITLibAlbum;
 
 fn t() {
     unsafe {
@@ -57,63 +66,70 @@ fn nsstring(string: &str) -> *mut Object {
     }
 }
 
-struct ITLibMediaItem {
-    obj: *mut Object
+trait ITLibMediaItem {
+    type Artist: ITLibArtist;
+    type Album: ITLibAlbum;
+
+    unsafe fn title(&self) -> String;
+    unsafe fn sort_title(&self) -> Option<String>;
+    unsafe fn artist(&self) -> &Self::Artist;
+    unsafe fn composer(&self) -> String;
+    unsafe fn sort_composer(&self) -> Option<String>;
+    unsafe fn rating(&self) -> i8;
+    unsafe fn is_rating_computed(&self) -> bool;
+    unsafe fn start_time(&self) -> u64;
+    unsafe fn stop_time(&self) -> u64;
+    unsafe fn album(&self) -> &Self::Album;
+    unsafe fn genre(&self) -> String;
+    unsafe fn kind(&self) -> Option<String>;
+    unsafe fn media_kind(&self) -> ITLibMediaItemMediaKind;
+    unsafe fn file_size(&self) -> u64;
+    unsafe fn total_time(&self) -> u64;
+    unsafe fn track_number(&self) -> u64;
+    unsafe fn category(&self) -> Option<String>;
+    unsafe fn description(&self) -> Option<String>;
+    unsafe fn lyrics_content_rating(&self) -> ITLibMediaItemLyricsContentRating;
+    unsafe fn content_rating(&self) -> Option<String>;
+    unsafe fn modified_date(&self) -> Date<Utc>;
+    unsafe fn added_date(&self) -> Date<Utc>;
+    unsafe fn bitrate(&self) -> u64;
+    unsafe fn sample_rate(&self) -> u64;
+    unsafe fn beats_per_minute(&self) -> u64;
+    unsafe fn play_count(&self) -> u64;
+    unsafe fn last_played_date(&self) -> Date<Utc>;
+    unsafe fn play_status(&self) -> ITLibMediaItemPlayStatus;
+    unsafe fn location(&self) -> Url;
+    unsafe fn has_artwork_available(&self) -> bool;
+    unsafe fn artwork(&self) -> Option<ITLibArtwork>;
+    unsafe fn comments(&self) -> Option<String>;
+    unsafe fn is_purchased(&self) -> bool;
+    unsafe fn is_cloud(&self) -> bool;
+    unsafe fn is_drm_protected(&self) -> bool;
+    unsafe fn is_video(&self) -> bool;
+    unsafe fn video_info(&self) -> Option<ITLibMediaItemVideoInfo>;
+    unsafe fn release_date(&self) -> Option<Date<Utc>>;
+    unsafe fn year(&self) -> u64;
+    unsafe fn skip_count(&self) -> u64;
+    unsafe fn skip_date(&self) -> Option<Date<Utc>>;
+    unsafe fn voice_over_language(&self) -> Option<String>;
+    unsafe fn volume_adjustment(&self) -> i64;
+    unsafe fn volume_normalization_energy(&self) -> u64;
+    unsafe fn is_user_disabled(&self) -> bool;
+    unsafe fn grouping(&self) -> Option<String>;
+    unsafe fn location_type(&self) -> ITLibMediaItemLocationType;
 }
 
-impl ituneslibrary_sys::ITLibMediaItem for ITLibMediaItem {
-    unsafe fn title(self) -> String {
-        let a = self.obj.title();
-    }
-    unsafe fn sortTitle(self) -> String { todo!() }
-    unsafe fn artist(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn composer(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn sortComposer(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn rating(self) -> i64 { todo!() }
-    unsafe fn isRatingComputed(self) -> i8 { todo!() }
-    unsafe fn startTime(self) -> u64 { todo!() }
-    unsafe fn stopTime(self) -> u64 { todo!() }
-    unsafe fn album(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn genre(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn kind(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn mediaKind(self) -> u64 { todo!() }
-    unsafe fn fileSize(self) -> u64 { todo!() }
-    unsafe fn size(self) -> u64 { todo!() }
-    unsafe fn totalTime(self) -> u64 { todo!() }
-    unsafe fn trackNumber(self) -> u64 { todo!() }
-    unsafe fn category(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn description(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn lyricsContentRating(self) -> u64 { todo!() }
-    unsafe fn contentRating(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn modifiedDate(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn addedDate(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn bitrate(self) -> u64 { todo!() }
-    unsafe fn sampleRate(self) -> u64 { todo!() }
-    unsafe fn beatsPerMinute(self) -> u64 { todo!() }
-    unsafe fn playCount(self) -> u64 { todo!() }
-    unsafe fn lastPlayedDate(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn playStatus(self) -> u64 { todo!() }
-    unsafe fn location(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn hasArtworkAvailable(self) -> i8 { todo!() }
-    unsafe fn artwork(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn comments(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn isPurchased(self) -> i8 { todo!() }
-    unsafe fn isCloud(self) -> i8 { todo!() }
-    unsafe fn isDRMProtected(self) -> i8 { todo!() }
-    unsafe fn isVideo(self) -> i8 { todo!() }
-    unsafe fn videoInfo(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn releaseDate(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn year(self) -> u64 { todo!() }
-    unsafe fn fileType(self) -> u64 { todo!() }
-    unsafe fn skipCount(self) -> u64 { todo!() }
-    unsafe fn skipDate(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn voiceOverLanguage(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn volumeAdjustment(self) -> i64 { todo!() }
-    unsafe fn volumeNormalizationEnergy(self) -> u64 { todo!() }
-    unsafe fn isUserDisabled(self) -> i8 { todo!() }
-    unsafe fn grouping(self) -> *mut *mut objc::runtime::Object { todo!() }
-    unsafe fn locationType(self) -> u64 { todo!() }
-}
+enum ITLibMediaItemMediaKind {}
+
+enum ITLibMediaItemLyricsContentRating {}
+
+enum ITLibMediaItemPlayStatus {}
+
+struct ITLibArtwork {}
+
+struct ITLibMediaItemVideoInfo {}
+
+enum ITLibMediaItemLocationType {}
 
 #[cfg(test)]
 mod tests {
