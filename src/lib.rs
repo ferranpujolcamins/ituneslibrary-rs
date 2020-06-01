@@ -69,6 +69,8 @@ fn nsstring(string: &str) -> *mut Object {
 trait ITLibMediaItem {
     type Artist: ITLibArtist;
     type Album: ITLibAlbum;
+    type Artwork: ITLibArtwork;
+    type VideoInfo: ITLibMediaItemVideoInfo;
 
     unsafe fn title(&self) -> String;
     unsafe fn sort_title(&self) -> Option<String>;
@@ -100,13 +102,13 @@ trait ITLibMediaItem {
     unsafe fn play_status(&self) -> ITLibMediaItemPlayStatus;
     unsafe fn location(&self) -> Url;
     unsafe fn has_artwork_available(&self) -> bool;
-    unsafe fn artwork(&self) -> Option<ITLibArtwork>;
+    unsafe fn artwork(&self) -> Option<&Self::Artwork>;
     unsafe fn comments(&self) -> Option<String>;
     unsafe fn is_purchased(&self) -> bool;
     unsafe fn is_cloud(&self) -> bool;
     unsafe fn is_drm_protected(&self) -> bool;
     unsafe fn is_video(&self) -> bool;
-    unsafe fn video_info(&self) -> Option<ITLibMediaItemVideoInfo>;
+    unsafe fn video_info(&self) -> Option<&Self::VideoInfo>;
     unsafe fn release_date(&self) -> Option<Date<Utc>>;
     unsafe fn year(&self) -> u64;
     unsafe fn skip_count(&self) -> u64;
@@ -152,9 +154,9 @@ enum ITLibMediaItemPlayStatus {
     Unplayed,
 }
 
-struct ITLibArtwork {}
+trait ITLibArtwork {}
 
-struct ITLibMediaItemVideoInfo {}
+trait ITLibMediaItemVideoInfo {}
 
 enum ITLibMediaItemLocationType {
     URL,
