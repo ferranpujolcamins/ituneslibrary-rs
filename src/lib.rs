@@ -123,7 +123,7 @@ trait ITLibMediaItem {
 
 enum ITLibMediaItemMediaKind {
     KindAlertTone,
-    KindAudiobook,
+    KindAudioBook,
     KindBook,
     KindDigitalBooklet,
     KindHomeVideo,
