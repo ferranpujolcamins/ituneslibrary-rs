@@ -119,17 +119,49 @@ trait ITLibMediaItem {
     unsafe fn location_type(&self) -> ITLibMediaItemLocationType;
 }
 
-enum ITLibMediaItemMediaKind {}
+enum ITLibMediaItemMediaKind {
+    KindAlertTone,
+    KindAudiobook,
+    KindBook,
+    KindDigitalBooklet,
+    KindHomeVideo,
+    KindIOSApplication,
+    KindInteractiveBooklet,
+    KindMovie,
+    KindMusicVideo,
+    KindPDFBook,
+    KindPDFBooklet,
+    KindPodcast,
+    KindRingtone,
+    KindSong,
+    KindTVShow,
+    KindUnknown,
+    KindVoiceMemo,
+    KindITunesU,
+}
 
-enum ITLibMediaItemLyricsContentRating {}
+enum ITLibMediaItemLyricsContentRating {
+    None,
+    Explicit,
+    Clean,
+}
 
-enum ITLibMediaItemPlayStatus {}
+enum ITLibMediaItemPlayStatus {
+    None,
+    PartiallyPlayed,
+    Unplayed,
+}
 
 struct ITLibArtwork {}
 
 struct ITLibMediaItemVideoInfo {}
 
-enum ITLibMediaItemLocationType {}
+enum ITLibMediaItemLocationType {
+    URL,
+    File,
+    Remote,
+    Unknown,
+}
 
 #[cfg(test)]
 mod tests {
