@@ -14,7 +14,7 @@ use objc::runtime::{Object, Sel, BOOL};
 use objc_foundation::{INSArray, NSArray, NSString, INSString, NSObject};
 use objc::{msg_send, class, sel, sel_impl, __send_message, Encode, Encoding};
 use objc_id::{Owned, Id};
-use ituneslibrary_sys::{id, ITLibrary, ITLibInitOptions};
+use ituneslibrary_sys::{id};
 use std::any::Any;
 use std::ops::Deref;
 use std::mem;
@@ -25,25 +25,25 @@ use artist::ITLibArtist;
 use album::ITLibAlbum;
 
 fn t() {
-    unsafe {
-        let version = nsstring("1.0");
-        let obj: *mut Object = msg_send![class!(ITLibrary), alloc];
-        let mut error: *mut Object = msg_send![class!(NSError), alloc];
-        let mut error2: *mut *mut Object = &mut error;
-        let error3: *mut *mut *mut Object = &mut error2;
-        let obc: *mut Object = obj.initWithAPIVersion_error_(
-            version,
-            error3
-        );
-        let v = obj.apiMajorVersion();
-        println!("api version: {}", v);
-
-        // let a = NSArray:: obj.allMediaItems() as &INSArray<Item = Any, Own = Owned>;
-        let a: *mut NSArray<NSObject> = mem::transmute(obj.allMediaItems());
-        let c = (*a).count();
-        let z = &(*a)[2];
-        println!("count: {}", (*a).count())
-    }
+    // unsafe {
+    //     let version = nsstring("1.0");
+    //     let obj: *mut Object = msg_send![class!(ITLibrary), alloc];
+    //     let mut error: *mut Object = msg_send![class!(NSError), alloc];
+    //     let mut error2: *mut *mut Object = &mut error;
+    //     let error3: *mut *mut *mut Object = &mut error2;
+    //     let obc: *mut Object = obj.initWithAPIVersion_error_(
+    //         version,
+    //         error3
+    //     );
+    //     let v = obj.apiMajorVersion();
+    //     println!("api version: {}", v);
+    //
+    //     // let a = NSArray:: obj.all_media_items() as &INSArray<Item = Any, Own = Owned>;
+    //     let a: *mut NSArray<NSObject> = mem::transmute(obj.allMediaItems());
+    //     let c = (*a).count();
+    //     let z = &(*a)[2];
+    //     println!("count: {}", (*a).count())
+    // }
 }
 
 unsafe fn from_obj_array<A>(obj_array: *mut Object) -> Id<A> where A: INSArray {
@@ -64,6 +64,32 @@ fn nsstring(string: &str) -> *mut Object {
                                                      encoding:UTF8_ENCODING];
         return obj
     }
+}
+
+enum Error {}
+
+trait ITLibrary where Self: std::marker::Sized {
+    type MediaItem: ITLibMediaItem;
+
+    unsafe fn new_with_api_version(api_version: String) -> Result<Self, Error>;
+    unsafe fn new_with_api_version_and_options(api_version: String, options: ITLibInitOptions) ->
+                                                                                     Result<Self, Error>;
+    unsafe fn artwork_for_media_file(self, media_file: Url) -> Option<&'static <<Self as ITLibrary>::MediaItem as ITLibMediaItem>::Artwork>;
+    unsafe fn reload_data(self) -> bool;
+    unsafe fn unload_data(self);
+    unsafe fn application_version(self) -> String;
+    unsafe fn api_major_version(self) -> u64;
+    unsafe fn api_minor_version(self) -> u64;
+    unsafe fn media_folder_location(self) -> Option<Url>;
+    unsafe fn music_folder_location(self) -> Option<Url>;
+    unsafe fn should_show_content_rating(self) -> i8;
+    unsafe fn all_media_items(self) -> Vec<&'static Self::MediaItem>;
+    // unsafe fn all_playlists(self) -> *mut *mut objc::runtime::Object;
+}
+
+enum ITLibInitOptions {
+    LazyLoadData,
+    None
 }
 
 trait ITLibMediaItem {
