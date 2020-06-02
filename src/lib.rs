@@ -6,8 +6,13 @@ extern crate chrono;
 #[link(name = "iTunesLibrary", kind = "framework")]
 extern {}
 
-mod artist;
 mod album;
+mod artist;
+mod artwork;
+mod error;
+mod library;
+mod media_item;
+mod traits;
 
 use std::os::raw::c_void;
 use objc::runtime::{Object, Sel, BOOL};
@@ -21,8 +26,6 @@ use std::mem;
 use chrono::{Date, Utc};
 use url::Url;
 
-use artist::ITLibArtist;
-use album::ITLibAlbum;
 
 fn t() {
     // unsafe {
@@ -66,138 +69,20 @@ fn nsstring(string: &str) -> *mut Object {
     }
 }
 
-enum Error {}
-
-trait ITLibrary where Self: std::marker::Sized {
-    type MediaItem: ITLibMediaItem;
-
-    unsafe fn new_with_api_version(api_version: String) -> Result<Self, Error>;
-    unsafe fn new_with_api_version_and_options(api_version: String, options: ITLibInitOptions) ->
-                                                                                     Result<Self, Error>;
-    unsafe fn artwork_for_media_file(self, media_file: Url) -> Option<&'static <<Self as ITLibrary>::MediaItem as ITLibMediaItem>::Artwork>;
-    unsafe fn reload_data(self) -> bool;
-    unsafe fn unload_data(self);
-    unsafe fn application_version(self) -> String;
-    unsafe fn api_major_version(self) -> u64;
-    unsafe fn api_minor_version(self) -> u64;
-    unsafe fn media_folder_location(self) -> Option<Url>;
-    unsafe fn music_folder_location(self) -> Option<Url>;
-    unsafe fn should_show_content_rating(self) -> i8;
-    unsafe fn all_media_items(self) -> Vec<&'static Self::MediaItem>;
-    // unsafe fn all_playlists(self) -> *mut *mut objc::runtime::Object;
-}
-
-enum ITLibInitOptions {
-    LazyLoadData,
-    None
-}
-
-trait ITLibMediaItem {
-    type Artist: ITLibArtist;
-    type Album: ITLibAlbum;
-    type Artwork: ITLibArtwork;
-    type VideoInfo: ITLibMediaItemVideoInfo;
-
-    unsafe fn title(&self) -> String;
-    unsafe fn sort_title(&self) -> Option<String>;
-    unsafe fn artist(&self) -> &Self::Artist;
-    unsafe fn composer(&self) -> String;
-    unsafe fn sort_composer(&self) -> Option<String>;
-    unsafe fn rating(&self) -> i8;
-    unsafe fn is_rating_computed(&self) -> bool;
-    unsafe fn start_time(&self) -> u64;
-    unsafe fn stop_time(&self) -> u64;
-    unsafe fn album(&self) -> &Self::Album;
-    unsafe fn genre(&self) -> String;
-    unsafe fn kind(&self) -> Option<String>;
-    unsafe fn media_kind(&self) -> ITLibMediaItemMediaKind;
-    unsafe fn file_size(&self) -> u64;
-    unsafe fn total_time(&self) -> u64;
-    unsafe fn track_number(&self) -> u64;
-    unsafe fn category(&self) -> Option<String>;
-    unsafe fn description(&self) -> Option<String>;
-    unsafe fn lyrics_content_rating(&self) -> ITLibMediaItemLyricsContentRating;
-    unsafe fn content_rating(&self) -> Option<String>;
-    unsafe fn modified_date(&self) -> Date<Utc>;
-    unsafe fn added_date(&self) -> Date<Utc>;
-    unsafe fn bitrate(&self) -> u64;
-    unsafe fn sample_rate(&self) -> u64;
-    unsafe fn beats_per_minute(&self) -> u64;
-    unsafe fn play_count(&self) -> u64;
-    unsafe fn last_played_date(&self) -> Date<Utc>;
-    unsafe fn play_status(&self) -> ITLibMediaItemPlayStatus;
-    unsafe fn location(&self) -> Url;
-    unsafe fn has_artwork_available(&self) -> bool;
-    unsafe fn artwork(&self) -> Option<&Self::Artwork>;
-    unsafe fn comments(&self) -> Option<String>;
-    unsafe fn is_purchased(&self) -> bool;
-    unsafe fn is_cloud(&self) -> bool;
-    unsafe fn is_drm_protected(&self) -> bool;
-    unsafe fn is_video(&self) -> bool;
-    unsafe fn video_info(&self) -> Option<&Self::VideoInfo>;
-    unsafe fn release_date(&self) -> Option<Date<Utc>>;
-    unsafe fn year(&self) -> u64;
-    unsafe fn skip_count(&self) -> u64;
-    unsafe fn skip_date(&self) -> Option<Date<Utc>>;
-    unsafe fn voice_over_language(&self) -> Option<String>;
-    unsafe fn volume_adjustment(&self) -> i64;
-    unsafe fn volume_normalization_energy(&self) -> u64;
-    unsafe fn is_user_disabled(&self) -> bool;
-    unsafe fn grouping(&self) -> Option<String>;
-    unsafe fn location_type(&self) -> ITLibMediaItemLocationType;
-}
-
-enum ITLibMediaItemMediaKind {
-    KindAlertTone,
-    KindAudioBook,
-    KindBook,
-    KindDigitalBooklet,
-    KindHomeVideo,
-    KindIOSApplication,
-    KindInteractiveBooklet,
-    KindMovie,
-    KindMusicVideo,
-    KindPDFBook,
-    KindPDFBooklet,
-    KindPodcast,
-    KindRingtone,
-    KindSong,
-    KindTVShow,
-    KindUnknown,
-    KindVoiceMemo,
-    KindITunesU,
-}
-
-enum ITLibMediaItemLyricsContentRating {
-    None,
-    Explicit,
-    Clean,
-}
-
-enum ITLibMediaItemPlayStatus {
-    None,
-    PartiallyPlayed,
-    Unplayed,
-}
-
-trait ITLibArtwork {}
-
-trait ITLibMediaItemVideoInfo {}
-
-enum ITLibMediaItemLocationType {
-    URL,
-    File,
-    Remote,
-    Unknown,
-}
 
 #[cfg(test)]
 mod tests {
     use crate::{t};
+    use objc_id::ShareId;
+    use crate::traits;
+    use crate::library::ITLibrary;
+    use crate::media_item::ITLibMediaItem;
+    use crate::traits::ITLibraryTrait;
 
     #[test]
     fn it_works() {
-        t();
-        println!("OK");
+        let library = ITLibrary::new_with_api_version("1.0").unwrap();
+        let items: Vec<ShareId<ITLibMediaItem>> = library.all_media_items();
+        println!("OK")
     }
 }
